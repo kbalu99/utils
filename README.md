@@ -4,9 +4,10 @@ Utilities
 # Quickstart script - Angular Progressive Web App
 
 # Requires
- - NPM
- - Node
- - Protractor (global install)
+ - NPM and Node - https://nodejs.org/en/download/
+ - Protractor (global install) - http://www.protractortest.org/#/
+		npm install -g protractor
+		webdriver-manager update
 
 # Installs
  - Angular app using @angular-cli
