@@ -11,7 +11,8 @@ Utilities
 
 # Installs
  - Angular app using @angular-cli
- (locally to project)
+ 
+(locally to project)
  - Webpack 
  - Webpack-CLI 
  - Karma 
