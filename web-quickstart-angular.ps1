@@ -48,7 +48,7 @@ Write-Host "CLOSE script if inaccurate." -ForegroundColor Red
 Write-Host "`n"
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
-# Initiate Angular App:
+# Initiate Angular App:  /adds flags for SASS, and Routing features
 ng new $AppName --style=scss --routing
 
 ## Moving into App folder to install dependecies locally for the project
