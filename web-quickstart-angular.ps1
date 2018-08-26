@@ -1,32 +1,168 @@
-# Needs Git installed prior to the script
+# Needs Git, NPM and Node installed prior to the script
 
+#################################################################
 # Setting Execution Policy
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+try {
+    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+}
+catch [System.Security.SecurityException] {
+    Write-Host "Issue in setting up execution policy. Continuing with script..." -ForegroundColor Red
+}
+catch {
+    Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
+    Write-Host "Step: Setting execution policy"
+    Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+    exit
+}
+
 $ErrorActionPreference = "Stop"
 
-# Verifying latest software installed
-$npm_installed = npm -v
-$node_installed = node -v
-
-$npm_latest = npm view --lts npm version
-$node_latest = npm view --lts node version
-
-If ($npm_installed -eq $npm_latest){
-} Else {
-Write-Host "NPM is not in latest version. Installed - '$npm_installed'  / Latest - '$npm_latest' `n Press any key to continue"
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+#################################################################
+# Checking whether Git, Node and NPM are installed
+try
+{
+    $_npm_v = npm -v
+    $_node_v = node -v
+    $_git_v = git --version
 }
-Write-Host "`n"
-If ($node_installed -eq $node_latest){
-} Else {
-Write-Host "Node is not in latest version. Installed - '$node_installed'  / Latest - '$node_latest' `n Press any key to continue"
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+catch [System.Management.Automation.CommandNotFoundException]
+{
+    Write-Host "The following dependencies need to be installed prior to this - `n" -ForegroundColor Red
+    Write-Host "Node" -ForegroundColor Red
+    Write-Host "NPM" -ForegroundColor Red
+    Write-Host "Git" -ForegroundColor Red
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+    exit
 }
+catch
+{
+    Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
+    Write-Host "Step: NPM, Node and Git installation check"
+    Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+    exit  
+}
+#################################################################
+# Check if @angular-cli is installed; If not, let script install after user permission
+try
+{
+    $_ng_v = ng -v
+}
+catch [System.Management.Automation.CommandNotFoundException]
+{
+    Write-Host "The following dependencies need to be installed prior to this - "
+    Write-Host "@angular-cli" -ForegroundColor Red
+    Write-Host "`n"
+    $option = Read-Host -Prompt 'Do you want the script to install @angular-cli globally? [YES] / [NO]: '
+    If ($option -eq 'YES' -or $option -eq 'yes' -or $option -eq 'y'){
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+        npm install -g @angular/cli
+        $_ng_v = ng -v
+    } Else {
+    exit
+    }
+}
+catch
+{
+    Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
+    Write-Host "Step: @angular-cli installation check"
+    Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+    exit   
+}
+
+#################################################################
+# Obtain all needed information from User
+$Loc = Read-Host -Prompt 'Local Folder to setup App (existing folder): '
+$AppName = Read-Host -Prompt 'Name of the App:'
+
+# Moving to the folder provided
+try {
+cd $Loc
+}
+catch {
+    Write-Host "Folder not found" -ForegroundColor Red
+    Write-Host "Step: Folder Location setup check"
+    Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+    exit
+}
+
+# Get the Github location
+$GitUserID = Read-Host -Prompt 'Github User ID:'
+$GitRepoName = Read-Host -Prompt 'Githubrepo Name (Make sure it is already created):'
+
+# Computing links
+$FullApp = $Loc + $AppName
+$GitRepoLink = "https://github.com/" + $GitUserID + "/" + $GitRepoName
+$GitRepoFullName = "https://github.com/" + $GitUserID + "/" + $GitRepoName + ".git"
+$GitIOPath = "https://"+ $GitUserID + ".github.io" + "/" + $GitRepoName + "/"
+
+
+#################################################################
+##  Check whether github repo is accesible
+## TO DO TO DO TO DO
+<# function CheckGitRepoStatus([int]$HTTP_Status) {
+    $HTTP_Request = [System.Net.WebRequest]::Create($GitRepoLink)
+    $HTTP_Request.Method = "GET"
+    $HTTP_Request.Accept = 'application/json;odata=verbose'
+    $HTTP_Response = $HTTP_Request.GetResponse()
+    $HTTP_Status = [int]$HTTP_Response.StatusCode
+    If ($HTTP_Status -eq 200) {
+        $HTTP_Response.Close()
+        return $HTTP_Status
+    }
+    Else {
+        Write-Host "Github repo - '$GitRepoLink' doesn't exist" -ForegroundColor Red
+        Write-Host "To continue, press any key after the Github repo is created..."
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+        $HTTP_Response.Close() 
+        $res = CheckGitRepoStatus(400)
+    }
+
+}
+try {
+$res = CheckGitRepoStatus(400)
+}
+catch {
+    Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
+    Write-Host "Step: Gitrepo http status check: '$GitRepoLink' "
+    Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
+    Write-Host $_.Exception.InnerException
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
+    exit   
+}
+ #>
+#################################################################
+
+$_npm_latest = npm view --lts npm version
+$_node_latest = npm view --lts node version
+$_git_latest = npm view --lts git version
+
+# Confirm all parameters
+Write-Host "Packages Installed"
+Write-Host "Package Name`tInstalled Version`tLatest Version"
+Write-Host "------------`t-----------------`t--------------"
+Write-Host "NPM`t'$_npm_v'`t'$_npm_latest'"
+Write-Host "Node`t'$_node_v'`t'$_node_latest'"
+Write-Host "Git`t'$_git_v'`t'$_git_latest'"
+Write-Host "`nYour Application"
+Write-Host "------------------"
+Write-Host "Local install in '$FullApp' " 
+Write-Host "Git Repo Name: '$GitRepoFullName' "
+Write-Host "Git IO URL: '$GitIOPath' "
 Write-Host "`n"
-ng -v
-Write-Host "Press any key to continue"
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+Write-Host "CLOSE script if inaccurate." -ForegroundColor Red
 Write-Host "`n"
+$option = Read-Host -Prompt '[YES] to continue [NO] to close'
+
+If ($option -eq 'YES' -or $option -eq 'yes' -or $option -eq 'y'){
+} Else {
+    Write-Host "`n Press any key to close"
+    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+    exit
+}
 
 ################
 ## TO DO
@@ -36,23 +172,15 @@ Write-Host "`n"
 # @custom\balas_schema
 ################
 
-# Get the location to instantiate web app
-$Loc = Read-Host -Prompt 'Location of web app instantiation:'
-cd $Loc
-Write-Host "`n"
-
-$AppName = Read-Host -Prompt 'Name of the app:'
-$FullApp = $Loc + $AppName
-Write-Host "Web app will be installed in '$FullApp' `n" -ForegroundColor Blue
-Write-Host "CLOSE script if inaccurate." -ForegroundColor Red
-Write-Host "`n"
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+#################################################################
+## Setting Up Application in Local
 
 # Initiate Angular App:  /adds flags for SASS, and Routing features
 ng new $AppName --style=scss --routing
 
 ## Moving into App folder to install dependecies locally for the project
 cd $AppName
+
 # Install Webpack:
 npm install --save-dev webpack
 npm install --save-dev webpack-cli
@@ -86,11 +214,13 @@ $webpack_installed = .\node_modules\.bin\webpack --version
 $webpackcli_installed = .\node_modules\.bin\webpack --version
 $karma_installed = karma --version
 $protractor_installed = protractor --version
-
+$bootstrap_installed = npm bootstrap --v
+$ng_bootstrap_installed = npm ng-bootstrap -v
+$fontawesome_installed = npm ng-bootstrap -v
 
 # Update Webdriver
-webdriver-manager update
-webdriver-manager start
+# webdriver-manager update
+# webdriver-manager start
 
 ####################
 ##  TO DO
@@ -115,17 +245,75 @@ webdriver-manager start
 
 ####################
 
-Write-Host "`n `n"
-Write-Host "Installed Successfully. Here are the parameters:"
-Write-Host "Node Version - '$node_installed'",  "(GLOBAL)" -ForegroundColor Blue, Blue
-Write-Host "NPM Version - '$npm_installed'",  "(GLOBAL)" -ForegroundColor Blue, Blue
-Write-Host "Karma Version - '$karma_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
-Write-Host "Protractor Version - '$protractor_installed'",  "(GLOBAL)" -ForegroundColor Blue, Blue
-Write-Host "Webpack Version - '$webpack_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
-Write-Host "Webpack-CLI Version - '$webpackcli_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
+#################################################################
+# Build App
+Write-Host "Building Production" -ForegroundColor Red
+ng build --prod --build-optimizer
+
+#################################################################
+# Deploy App - Push changes and publish
+Write-Host "Deploying to Github pages" -ForegroundColor Red
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin $GitRepoFullName
+git push -u origin master
+ng build --prod --base-href $GitIOPath
+ngh --dir dist/$AppName
+
+
+Start $GitIOPath
+
+
+
+$display_string = @"
+                ------------------------------------------------------------------------------------------------------------------------
+                Package Name        Installed Version               Latest Version              Location
+                ------------------------------------------------------------------------------------------------------------------------
+                NPM                 $_npm_v                           $_npm_latest                       GLOBAL
+                Node                $_node_v                         $_node_latest                      GLOBAL
+                Git                 $_git_v    $_git_latest                       GLOBAL
+                @angular-cli        _ng_cheat_v                     _ng_cheat_latest            GLOBAL
+                Karma               $karma_installed            _karma_latest               LOCAL
+                Protractor          $protractor_installed                   _protractor_latest          GLOBAL
+                Webpack             $webpack_installed                          _webpack_latest             LOCAL
+                Webpack-CLI Version $webpackcli_installed                          _webpack_cli_latest         LOCAL
+                Bootstrap           $bootstrap_installed                           _bootstrap_latest           LOCAL
+                ng-bootstrap        $ng_bootstrap_installed                           _ng-bootstrap_latest        LOCAL
+                Fontawesome         $fontawesome_installed                           _ft_latest                  LOCAL
+"@
+
+Write-Host "Packages Installed"
+$display_string
+
+Write-Host "`n`nYour Application"
+Write-Host "------------------"
+Write-Host "Local install in '$FullApp' " 
+Write-Host "Git Repo Name: '$GitRepoFullName' "
+Write-Host "Git IO URL: '$GitIOPath' "
+
+<# 
+Write-Host "Package Name`tInstalled Version`tLatest Version"
+Write-Host "------------`t-----------------`t--------------"
+Write-Host "NPM`t'$_npm_v'`t'$_npm_latest'",  "(GLOBAL)" -ForegroundColor Blue, Blue
+Write-Host "Node`t'$_node_v'`t'$_node_latest'",  "(GLOBAL)" -ForegroundColor Blue, Blue
+Write-Host "Git`t'$_git_v'`t'$_git_latest'",  "(GLOBAL)" -ForegroundColor Blue, Blue
+Write-Host "Karma`t'$karma_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
+Write-Host "Protractor`t'$protractor_installed'",  "(GLOBAL)" -ForegroundColor Blue, Blue
+Write-Host "Webpack`t'$webpack_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
+Write-Host "Webpack-CLI Version`t'$webpackcli_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
+Write-Host "Bootstrap`t'$bootstrap_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
+Write-Host "ng-bootstrap`t'$ng_bootstrap_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
+Write-Host "Fontawesome`t'$fontawesome_installed'",  "(LOCAL)" -ForegroundColor Blue, Red #>
 
 
 # Wait for keypress to close
 Write-Host "All done.. press any key to close"
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+
 
