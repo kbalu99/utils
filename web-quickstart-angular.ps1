@@ -1,6 +1,39 @@
-# Needs Git, NPM and Node installed prior to the script
+<#
+QUICKSTART SCRIPT - Angular Progressive WebApp
 
-#################################################################
+REQUIRES
+* NPM and Node - https://nodejs.org/en/download/
+* Protractor (global install) - http://www.protractortest.org/#/
+** npm install -g protractor
+** webdriver-manager update
+
+INSTALLS
+* Angular app using @angular*cli
+** custom schematic * @custom\balas_schema
+(locally to project)
+* Webpack 
+* Webpack CLI 
+* Karma 
+* Karma CLI 
+* Bootstrap
+* ng*bootstrap  (optional * ngx*bootstrap)
+* source*map*explorer
+* FontAwesome
+ 
+DEPENDENCY AUDIT AND FIX
+* npm audit fix
+
+PROESSES
+* webdriver*mangager update and start
+* ng*build & ng*serve (optional)
+ 
+OPTIONAL INSTALLS
+* Visual Studio Code
+** Entension * Angular 6 (by Mikael or John Papa)
+* 
+#>
+
+#****************************************************************************************************
 # Setting Execution Policy
 try {
     Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
@@ -18,16 +51,14 @@ catch {
 
 $ErrorActionPreference = "Stop"
 
-#################################################################
+#****************************************************************************************************
 # Checking whether Git, Node and NPM are installed
-try
-{
+try {
     $_npm_v = npm -v
     $_node_v = node -v
     $_git_v = git --version
 }
-catch [System.Management.Automation.CommandNotFoundException]
-{
+catch [System.Management.Automation.CommandNotFoundException] {
     Write-Host "The following dependencies need to be installed prior to this - `n" -ForegroundColor Red
     Write-Host "Node" -ForegroundColor Red
     Write-Host "NPM" -ForegroundColor Red
@@ -35,36 +66,34 @@ catch [System.Management.Automation.CommandNotFoundException]
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
     exit
 }
-catch
-{
+catch {
     Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
     Write-Host "Step: NPM, Node and Git installation check"
     Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
     exit  
 }
-#################################################################
+
+#****************************************************************************************************
 # Check if @angular-cli is installed; If not, let script install after user permission
-try
-{
+try {
     $_ng_v = ng -v
 }
-catch [System.Management.Automation.CommandNotFoundException]
-{
+catch [System.Management.Automation.CommandNotFoundException] {
     Write-Host "The following dependencies need to be installed prior to this - "
     Write-Host "@angular-cli" -ForegroundColor Red
     Write-Host "`n"
     $option = Read-Host -Prompt 'Do you want the script to install @angular-cli globally? [YES] / [NO]: '
-    If ($option -eq 'YES' -or $option -eq 'yes' -or $option -eq 'y'){
+    If ($option -eq 'YES' -or $option -eq 'yes' -or $option -eq 'y') {
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
         npm install -g @angular/cli
         $_ng_v = ng -v
-    } Else {
-    exit
+    }
+    Else {
+        exit
     }
 }
-catch
-{
+catch {
     Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
     Write-Host "Step: @angular-cli installation check"
     Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
@@ -72,14 +101,14 @@ catch
     exit   
 }
 
-#################################################################
+#****************************************************************************************************
 # Obtain all needed information from User
 $Loc = Read-Host -Prompt 'Local Folder to setup App (existing folder): '
 $AppName = Read-Host -Prompt 'Name of the App:'
 
 # Moving to the folder provided
 try {
-cd $Loc
+    Set-Location $Loc
 }
 catch {
     Write-Host "Folder not found" -ForegroundColor Red
@@ -97,10 +126,10 @@ $GitRepoName = Read-Host -Prompt 'Githubrepo Name (Make sure it is already creat
 $FullApp = $Loc + $AppName
 $GitRepoLink = "https://github.com/" + $GitUserID + "/" + $GitRepoName
 $GitRepoFullName = "https://github.com/" + $GitUserID + "/" + $GitRepoName + ".git"
-$GitIOPath = "https://"+ $GitUserID + ".github.io" + "/" + $GitRepoName + "/"
+$GitIOPath = "https://" + $GitUserID + ".github.io" + "/" + $GitRepoName + "/"
 
 
-#################################################################
+#****************************************************************************************************
 ##  Check whether github repo is accesible
 ## TO DO TO DO TO DO
 <# function CheckGitRepoStatus([int]$HTTP_Status) {
@@ -134,7 +163,8 @@ catch {
     exit   
 }
  #>
-#################################################################
+ 
+#****************************************************************************************************
 
 $_npm_latest = npm view --lts npm version
 $_node_latest = npm view --lts node version
@@ -157,24 +187,23 @@ Write-Host "CLOSE script if inaccurate." -ForegroundColor Red
 Write-Host "`n"
 $option = Read-Host -Prompt '[YES] to continue [NO] to close'
 
-If ($option -eq 'YES' -or $option -eq 'yes' -or $option -eq 'y'){
-} Else {
+If ($option -eq 'YES' -or $option -eq 'yes' -or $option -eq 'y') {
+}
+Else {
     Write-Host "`n Press any key to close"
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
     exit
 }
 
-################
-## TO DO
+#****************************************************************************************************
+################################# TO DO
 # Use custom schematics 
 # Code to identify, copy and use in ng new
 # Code to edit the package.json, 
 # @custom\balas_schema
-################
 
-#################################################################
-## Setting Up Application in Local
-
+#****************************************************************************************************
+# Setting Up Application in Local
 # Initiate Angular App:  /adds flags for SASS, and Routing features
 ng new $AppName --style=scss --routing
 
@@ -222,8 +251,8 @@ $fontawesome_installed = npm ng-bootstrap -v
 # webdriver-manager update
 # webdriver-manager start
 
-####################
-##  TO DO
+#****************************************************************************************************
+################################# TO DO
 # ng serve
 # setup config files for karma, protractor
 # webpack build, start server
@@ -242,15 +271,12 @@ $fontawesome_installed = npm ng-bootstrap -v
 # Visual Studio Code
 # 	- Extension - Angular
 
-
-####################
-
-#################################################################
+#****************************************************************************************************
 # Build App
 Write-Host "Building Production" -ForegroundColor Red
 ng build --prod --build-optimizer
 
-#################################################################
+#****************************************************************************************************
 # Deploy App - Push changes and publish
 Write-Host "Deploying to Github pages" -ForegroundColor Red
 git init
@@ -261,11 +287,12 @@ git push -u origin master
 ng build --prod --base-href $GitIOPath
 ngh --dir dist/$AppName
 
+#****************************************************************************************************
+# Open deployed app
+Start-Process $GitIOPath
 
-Start $GitIOPath
-
-
-
+#****************************************************************************************************
+# Display all changes
 $display_string = @"
                 ------------------------------------------------------------------------------------------------------------------------
                 Package Name        Installed Version               Latest Version              Location
@@ -306,7 +333,7 @@ Write-Host "Bootstrap`t'$bootstrap_installed'",  "(LOCAL)" -ForegroundColor Blue
 Write-Host "ng-bootstrap`t'$ng_bootstrap_installed'",  "(LOCAL)" -ForegroundColor Blue, Red
 Write-Host "Fontawesome`t'$fontawesome_installed'",  "(LOCAL)" -ForegroundColor Blue, Red #>
 
-
+#****************************************************************************************************
 # Wait for keypress to close
 Write-Host "All done.. press any key to close"
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
@@ -316,4 +343,4 @@ $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 
-
+#****************************************************************************************************

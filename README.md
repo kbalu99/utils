@@ -1,35 +1,32 @@
-# utils
-Utilities
+QUICKSTART SCRIPT - Angular Progressive WebApp
 
-# Quickstart script - Angular Progressive Web App
+REQUIRES
+* NPM and Node - https://nodejs.org/en/download/
+* Protractor (global install) - http://www.protractortest.org/#/
+** npm install -g protractor
+** webdriver-manager update
 
-# Requires
- - NPM and Node - https://nodejs.org/en/download/
- - Protractor (global install) - http://www.protractortest.org/#/
-	- npm install -g protractor
-	- webdriver-manager update
-
-# Installs
- - Angular app using @angular-cli
-	- custom schematic - @custom\balas_schema
- 
+INSTALLS
+* Angular app using @angular*cli
+** custom schematic * @custom\balas_schema
 (locally to project)
- - Webpack 
- - Webpack CLI 
- - Karma 
- - Karma CLI 
- - Bootstrap
- - ng-bootstrap  (optional - ngx-bootstrap)
- - source-map-explorer
+* Webpack 
+* Webpack CLI 
+* Karma 
+* Karma CLI 
+* Bootstrap
+* ng*bootstrap  (optional * ngx*bootstrap)
+* source*map*explorer
+* FontAwesome
  
-# Package dependency Audit and Fix
- - npm audit fix
+DEPENDENCY AUDIT AND FIX
+* npm audit fix
 
-# Starting Processes
- - webdriver-mangager update and start
- - ng-build & ng-serve (optional)
+PROESSES
+* webdriver*mangager update and start
+* ng*build & ng*serve (optional)
  
-# Optional Installs
- - Visual Studio Code
-	- Entension - Angular 6 (by Mikael or John Papa)
- - 
+OPTIONAL INSTALLS
+* Visual Studio Code
+** Entension * Angular 6 (by Mikael or John Papa)
+* 
