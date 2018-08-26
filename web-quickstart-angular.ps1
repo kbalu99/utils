@@ -131,38 +131,28 @@ $GitIOPath = "https://" + $GitUserID + ".github.io" + "/" + $GitRepoName + "/"
 
 #****************************************************************************************************
 ##  Check whether github repo is accesible
-## TO DO TO DO TO DO
-<# function CheckGitRepoStatus([int]$HTTP_Status) {
+function CheckGitRepoStatus([int]$HTTP_Status) {
     $HTTP_Request = [System.Net.WebRequest]::Create($GitRepoLink)
     $HTTP_Request.Method = "GET"
     $HTTP_Request.Accept = 'application/json;odata=verbose'
-    $HTTP_Response = $HTTP_Request.GetResponse()
-    $HTTP_Status = [int]$HTTP_Response.StatusCode
-    If ($HTTP_Status -eq 200) {
-        $HTTP_Response.Close()
-        return $HTTP_Status
-    }
-    Else {
-        Write-Host "Github repo - '$GitRepoLink' doesn't exist" -ForegroundColor Red
-        Write-Host "To continue, press any key after the Github repo is created..."
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
-        $HTTP_Response.Close() 
-        $res = CheckGitRepoStatus(400)
-    }
 
+    try {
+        $HTTP_Response = $HTTP_Request.GetResponse()
+        $HTTP_Status = [int]$HTTP_Response.StatusCode
+        If ($HTTP_Status -eq 200) {
+            $HTTP_Response.Close()
+            return 
+            }
+        }
+        catch {
+            Write-Host "Github repo - '$GitRepoLink' doesn't exist" -ForegroundColor Red
+            Write-Host "To continue, press any key after the Github repo is created..."
+            $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+            CheckGitRepoStatus(400)  
+        }
 }
-try {
-$res = CheckGitRepoStatus(400)
-}
-catch {
-    Write-Host "An error occurred that could not be resolved" -ForegroundColor Red
-    Write-Host "Step: Gitrepo http status check: '$GitRepoLink' "
-    Write-Host $_.Exception.GetType().FullName, $_.Exception.Message
-    Write-Host $_.Exception.InnerException
-    $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); 
-    exit   
-}
- #>
+CheckGitRepoStatus(400)
+
  
 #****************************************************************************************************
 
@@ -171,7 +161,7 @@ $_node_latest = npm view --lts node version
 $_git_latest = npm view --lts git version
 
 # Confirm all parameters
-Write-Host "Packages Installed"
+Write-Host "`nPackages Installed"
 Write-Host "Package Name`tInstalled Version`tLatest Version"
 Write-Host "------------`t-----------------`t--------------"
 Write-Host "NPM`t'$_npm_v'`t'$_npm_latest'"
@@ -208,7 +198,7 @@ Else {
 ng new $AppName --style=scss --routing
 
 ## Moving into App folder to install dependecies locally for the project
-cd $AppName
+Set-Location $AppName
 
 # Install Webpack:
 npm install --save-dev webpack
@@ -315,9 +305,9 @@ $display_string
 
 Write-Host "`n`nYour Application"
 Write-Host "------------------"
-Write-Host "Local install in '$FullApp' " 
-Write-Host "Git Repo Name: '$GitRepoFullName' "
-Write-Host "Git IO URL: '$GitIOPath' "
+Write-Host "Local install in" "'$FullApp' ", -ForegroundColor Blue, Red
+Write-Host "Git Repo Name:" "'$GitRepoFullName' " -ForegroundColor Blue, Red
+Write-Host "Git IO URL:" "'$GitIOPath' " -ForegroundColor Blue, Red
 
 <# 
 Write-Host "Package Name`tInstalled Version`tLatest Version"
